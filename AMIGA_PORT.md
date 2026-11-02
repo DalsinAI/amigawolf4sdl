@@ -1,6 +1,6 @@
 # Amiga port intake: Wolf4SDL
 
-- Port Atlas: [g-wolf4sdl](https://www.amigachrome.com/ports/#g-wolf4sdl)
+- Port Atlas: [g-wolf4sdl](https://www.amicradle.com/ports/#g-wolf4sdl)
 - Priority: `P2`
 - Atlas decision: `evaluate`
 - Upstream source: `https://github.com/mozzwald/wolf4sdl`
