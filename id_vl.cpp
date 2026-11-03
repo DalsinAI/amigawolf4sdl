@@ -17,7 +17,7 @@
 #endif
 
 boolean fullscreen = true;
-#if defined(_arch_dreamcast)
+#if defined(_arch_dreamcast) || defined(__amigaos__)
 boolean usedoublebuffering = false;
 unsigned screenWidth = 320;
 unsigned screenHeight = 200;

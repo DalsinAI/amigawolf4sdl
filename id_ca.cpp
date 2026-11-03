@@ -141,6 +141,7 @@ void CAL_GetGrChunkLength (int chunk)
 {
     lseek(grhandle,GRFILEPOS(chunk),SEEK_SET);
     read(grhandle,&chunkexplen,sizeof(chunkexplen));
+    chunkexplen = LE32(chunkexplen);
     chunkcomplen = GRFILEPOS(chunk+1)-GRFILEPOS(chunk)-4;
 }
 
@@ -470,6 +471,13 @@ void CAL_SetupGrFile (void)
 
     read(handle, grhuffman, sizeof(grhuffman));
     close(handle);
+#ifdef WOLF_BIG_ENDIAN
+    for (int n = 0; n < (int) lengthof(grhuffman); n++)
+    {
+        grhuffman[n].bit0 = LE16(grhuffman[n].bit0);
+        grhuffman[n].bit1 = LE16(grhuffman[n].bit1);
+    }
+#endif
 
     // load the data offsets from ???head.ext
     strcpy(fname,gheadname);
@@ -530,6 +538,13 @@ void CAL_SetupGrFile (void)
     read (grhandle,compseg,chunkcomplen);
     CAL_HuffExpand(compseg, (byte*)pictable, NUMPICS * sizeof(pictabletype), grhuffman);
     free(compseg);
+#ifdef WOLF_BIG_ENDIAN
+    for (int n = 0; n < NUMPICS; n++)
+    {
+        pictable[n].width = LE16(pictable[n].width);
+        pictable[n].height = LE16(pictable[n].height);
+    }
+#endif
 }
 
 //==========================================================================
@@ -566,7 +581,7 @@ void CAL_SetupMapFile (void)
     read(handle, tinf, length);
     close(handle);
 
-    RLEWtag=tinf->RLEWtag;
+    RLEWtag=LE16(tinf->RLEWtag);
 
 //
 // open the data file
@@ -592,7 +607,7 @@ void CAL_SetupMapFile (void)
 //
     for (i=0;i<NUMMAPS;i++)
     {
-        pos = tinf->headeroffsets[i];
+        pos = LE32(tinf->headeroffsets[i]);
         if (pos<0)                          // $FFFFFFFF start is a sparse map
             continue;
 
@@ -600,6 +615,15 @@ void CAL_SetupMapFile (void)
         CHECKMALLOCRESULT(mapheaderseg[i]);
         lseek(maphandle,pos,SEEK_SET);
         read (maphandle,(memptr)mapheaderseg[i],sizeof(maptype));
+#ifdef WOLF_BIG_ENDIAN
+        for (int p = 0; p < 3; p++)
+        {
+            mapheaderseg[i]->planestart[p] = LE32(mapheaderseg[i]->planestart[p]);
+            mapheaderseg[i]->planelength[p] = LE16(mapheaderseg[i]->planelength[p]);
+        }
+        mapheaderseg[i]->width = LE16(mapheaderseg[i]->width);
+        mapheaderseg[i]->height = LE16(mapheaderseg[i]->height);
+#endif
     }
 
     free(tinf);
@@ -640,6 +664,10 @@ void CAL_SetupAudioFile (void)
     if (!CA_LoadFile(fname, &ptr))
         CA_CannotOpen(fname);
     audiostarts = (int32_t*)ptr;
+#ifdef WOLF_BIG_ENDIAN
+    for (int n = 0; n <= NUMSNDCHUNKS; n++)
+        audiostarts[n] = LE32(audiostarts[n]);
+#endif
 
 //
 // open the data file
@@ -746,6 +774,21 @@ int32_t CA_CacheAudioChunk (int chunk)
 
     lseek(audiohandle,pos,SEEK_SET);
     read(audiohandle,audiosegs[chunk],size);
+
+#ifdef WOLF_BIG_ENDIAN
+    if (chunk >= STARTMUSIC)                // the music is words, read as words
+    {
+        word *music = (word *) audiosegs[chunk];
+        for (int n = 0; n < size / 2; n++)
+            music[n] = LE16(music[n]);
+    }
+    else if (chunk < STARTADLIBSOUNDS)      // a PC speaker sound's header
+    {
+        SoundCommon *common = (SoundCommon *) audiosegs[chunk];
+        common->length = LE32(common->length);
+        common->priority = LE16(common->priority);
+    }
+#endif
 
     return size;
 }
@@ -894,7 +937,8 @@ void CAL_ExpandGrChunk (int chunk, int32_t *source)
         //
         // everything else has an explicit size longword
         //
-        expanded = *source++;
+        expanded = LE32(*source);
+        source++;
     }
 
     //
@@ -904,6 +948,15 @@ void CAL_ExpandGrChunk (int chunk, int32_t *source)
     grsegs[chunk]=(byte *) malloc(expanded);
     CHECKMALLOCRESULT(grsegs[chunk]);
     CAL_HuffExpand((byte *) source, grsegs[chunk], expanded, grhuffman);
+#ifdef WOLF_BIG_ENDIAN
+    if (chunk >= STARTFONT && chunk < STARTFONT + NUMFONT)
+    {
+        fontstruct *font = (fontstruct *) grsegs[chunk];
+        font->height = LE16(font->height);
+        for (int n = 0; n < 256; n++)
+            font->location[n] = LE16(font->location[n]);
+    }
+#endif
 }
 
 
@@ -1080,7 +1133,7 @@ void CA_CacheMap (int mapnum)
         // The resulting RLEW chunk also does, even though it's not really
         // needed
         //
-        expanded = *source;
+        expanded = LE16(*source);
         source++;
         buffer2seg = (word *) malloc(expanded);
         CHECKMALLOCRESULT(buffer2seg);

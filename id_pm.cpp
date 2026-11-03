@@ -23,12 +23,12 @@ void PM_Startup()
     if(!file)
         CA_CannotOpen(fname);
 
-    ChunksInFile = 0;
-    fread(&ChunksInFile, sizeof(word), 1, file);
-    PMSpriteStart = 0;
-    fread(&PMSpriteStart, sizeof(word), 1, file);
-    PMSoundStart = 0;
-    fread(&PMSoundStart, sizeof(word), 1, file);
+    // Words in the file, ints here
+    word header[3] = { 0, 0, 0 };
+    fread(header, sizeof(word), 3, file);
+    ChunksInFile = LE16(header[0]);
+    PMSpriteStart = LE16(header[1]);
+    PMSoundStart = LE16(header[2]);
 
     uint32_t* pageOffsets = (uint32_t *) malloc((ChunksInFile + 1) * sizeof(int32_t));
     CHECKMALLOCRESULT(pageOffsets);
@@ -37,6 +37,13 @@ void PM_Startup()
     word *pageLengths = (word *) malloc(ChunksInFile * sizeof(word));
     CHECKMALLOCRESULT(pageLengths);
     fread(pageLengths, sizeof(word), ChunksInFile, file);
+#ifdef WOLF_BIG_ENDIAN
+    for(int j = 0; j < ChunksInFile; j++)
+    {
+        pageOffsets[j] = LE32(pageOffsets[j]);
+        pageLengths[j] = LE16(pageLengths[j]);
+    }
+#endif
 
     fseek(file, 0, SEEK_END);
     long fileSize = ftell(file);
@@ -112,6 +119,23 @@ void PM_Startup()
 
     // last page points after page buffer
     PMPages[ChunksInFile] = ptr;
+
+#ifdef WOLF_BIG_ENDIAN
+    // A sprite's header; its columns are read a byte at a time (READWORD)
+    for(i = PMSpriteStart; i < PMSoundStart; i++)
+    {
+        word *shape = (word *) PMPages[i];
+        if(PMPages[i + 1] - PMPages[i] < 4) continue;
+        shape[0] = LE16(shape[0]);
+        shape[1] = LE16(shape[1]);
+        for(int col = 0; col <= shape[1] - shape[0] && col < 64; col++)
+            shape[2 + col] = LE16(shape[2 + col]);
+    }
+    // The list of digitized sounds, the last page
+    word *sounds = (word *) PMPages[ChunksInFile - 1];
+    for(int j = 0; j < (PMPages[ChunksInFile] - PMPages[ChunksInFile - 1]) / 2; j++)
+        sounds[j] = LE16(sounds[j]);
+#endif
 
     free(pageLengths);
     free(pageOffsets);
