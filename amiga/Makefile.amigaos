@@ -1,0 +1,48 @@
+# Wolf4SDL for AmigaOS 3.x / AmiCradle, 68040 + FPU, on acsdl12.
+#
+#   make -f amiga/Makefile.amigaos STOVE=/path/to/os32-gcc16/prefix \
+#        NDK=/path/to/gfopensdk/OpenNDK/Include_H \
+#        ACSDL=/path/to/amicradle-guest/gameports/acsdl12
+#
+# STOVE is GFOpenAmigaGCC 16.2.0-open4 or later. ACSDL is acsdl12, built with
+# its own Makefile.amigaos. VARIANT picks the data the game is built for, as
+# version.h explains: shareware (WL1, the default) or full (WL6).
+# Output: build/amigaos/wolf3d, run from a drawer that holds the game's data.
+
+STOVE   ?= $(HOME)/AmiCradle/stoves/os32-gcc16/prefix
+NDK     ?= $(HOME)/AmiCradle/gfopensdk/OpenNDK/Include_H
+ACSDL   ?= ../amicradle-guest/gameports/acsdl12
+ACGAME  ?= $(ACSDL)/../acgame
+CC      = $(STOVE)/bin/m68k-amigaos-gcc
+CXX     = $(STOVE)/bin/m68k-amigaos-g++
+CPU     ?= -m68040 -m68881
+OPT     ?= -O2 -fomit-frame-pointer
+VARIANT ?= shareware
+FLAGS   = -noixemul $(OPT) $(CPU) -fcommon -w -DVARIANT_$(VARIANT) -DWOLF_BIG_ENDIAN -DDATADIR=\"PROGDIR:\" \
+          -I. -I$(ACSDL)/include/SDL -I$(ACGAME)/include -I$(NDK)
+CCFLAGS = $(FLAGS) -std=gnu99
+CXXFLAGS = $(FLAGS) -fno-exceptions -fno-rtti
+LDFLAGS = -noixemul $(CPU)
+BUILD   = build/amigaos
+
+SRCS    = fmopl.cpp id_ca.cpp id_in.cpp id_pm.cpp id_sd.cpp id_us_1.cpp id_vh.cpp id_vl.cpp \
+          signon.cpp wl_act1.cpp wl_act2.cpp wl_agent.cpp wl_atmos.cpp wl_cloudsky.cpp \
+          wl_debug.cpp wl_draw.cpp wl_floorceiling.cpp wl_game.cpp wl_inter.cpp wl_main.cpp \
+          wl_menu.cpp wl_parallax.cpp wl_play.cpp wl_state.cpp wl_text.cpp
+OBJS    = $(SRCS:%.cpp=$(BUILD)/%.o)
+
+all: $(BUILD)/wolf3d
+
+$(BUILD)/wolf3d: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(ACSDL)/build/amigaos/libacsdl12.a -lm
+
+$(BUILD)/%.o: %.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD):
+	mkdir -p $@
+
+clean:
+	rm -rf $(BUILD)
+
+.PHONY: all clean

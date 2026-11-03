@@ -11,8 +11,12 @@
 
 //#define SPEAR
 //#define SPEARDEMO
+#ifndef VARIANT_full
 #define UPLOAD
+#endif
+#ifndef VARIANT_shareware
 #define GOODTIMES
+#endif
 #define CARMACIZED
 //#define APOGEE_1_0
 //#define APOGEE_1_1

@@ -6,6 +6,16 @@
 
 #include <assert.h>
 #include <fcntl.h>
+
+// The game's data files are little-endian.
+#ifdef WOLF_BIG_ENDIAN
+    #define LE16(x) ((uint16_t) (((uint16_t) (x) >> 8) | ((uint16_t) (x) << 8)))
+    #define LE32(x) ((uint32_t) (((uint32_t) (x) >> 24) | (((uint32_t) (x) >> 8) & 0xff00) \
+                                 | (((uint32_t) (x) << 8) & 0xff0000) | ((uint32_t) (x) << 24)))
+#else
+    #define LE16(x) (x)
+    #define LE32(x) (x)
+#endif
 #include <math.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -1398,6 +1408,8 @@ static inline fixed FixedMul(fixed a, fixed b)
     #define strncasecmp strnicmp
     #define snprintf _snprintf
 #else
+    #define itoa wolf_itoa
+    #define ltoa wolf_ltoa
     static inline char* itoa(int value, char* string, int radix)
     {
 	    sprintf(string, "%d", value);

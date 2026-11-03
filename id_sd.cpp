@@ -563,6 +563,17 @@ void SD_PrepareSound(int which)
         {'f','m','t',' '}, 0x10, 0x0001, 1, param_samplerate, param_samplerate*2, 2, 16};
     wavechunk dhead = {{'d', 'a', 't', 'a'}, destsamples*2};
     head.filelenminus8 = sizeof(head) + destsamples*2;  // (sizeof(dhead)-8 = 0)
+#ifdef WOLF_BIG_ENDIAN
+    head.filelenminus8 = LE32(head.filelenminus8);
+    head.formatlen = LE32(head.formatlen);
+    head.val0x0001 = LE16(head.val0x0001);
+    head.channels = LE16(head.channels);
+    head.samplerate = LE32(head.samplerate);
+    head.bytespersec = LE32(head.bytespersec);
+    head.bytespersample = LE16(head.bytespersample);
+    head.bitspersample = LE16(head.bitspersample);
+    dhead.chunklength = LE32(dhead.chunklength);
+#endif
     memcpy(wavebuffer, &head, sizeof(head));
     memcpy(wavebuffer+sizeof(head), &dhead, sizeof(dhead));
 
@@ -576,6 +587,9 @@ void SD_PrepareSound(int which)
     {
         newsamples[i] = GetSample((float)size * (float)i / (float)destsamples,
             origsamples, size);
+#ifdef WOLF_BIG_ENDIAN
+        newsamples[i] = LE16(newsamples[i]);
+#endif
     }
     SoundBuffers[which] = wavebuffer;
 
@@ -1020,7 +1034,11 @@ void SDL_IMFMusicPlayer(void *udata, Uint8 *stream, int len)
             {
                 if(sqHackTime > alTimeCount) break;
                 sqHackTime = alTimeCount + *(sqHackPtr+1);
+#ifdef WOLF_BIG_ENDIAN
+                alOut((byte) *sqHackPtr, (byte) (*sqHackPtr >> 8));
+#else
                 alOut(*(byte *) sqHackPtr, *(((byte *) sqHackPtr)+1));
+#endif
                 sqHackPtr += 2;
                 sqHackLen -= 4;
             }

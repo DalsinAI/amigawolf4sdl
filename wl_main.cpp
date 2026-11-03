@@ -9,7 +9,9 @@
 #include "wl_def.h"
 #pragma hdrstop
 #include "wl_atmos.h"
+#ifdef _WIN32
 #include <SDL_syswm.h>
+#endif
 
 
 /*
@@ -95,8 +97,13 @@ int     param_samplerate = 11025;       // higher samplerates result in "out of 
 int     param_audiobuffer = 128;
 #else
 int     param_joystickhat = -1;
+#ifdef __amigaos__
+int     param_samplerate = 22050;       // the OPL emulation's cost goes with the rate
+int     param_audiobuffer = 1024;
+#else
 int     param_samplerate = 44100;
 int     param_audiobuffer = 2048 / (44100 / param_samplerate);
+#endif
 #endif
 
 int     param_mission = 0;
@@ -1216,6 +1223,10 @@ static void InitGame()
         printf("Unable to init SDL: %s\n", SDL_GetError());
         exit(1);
     }
+
+#ifdef __amigaos__
+    ACSDL_SetKeyMap(0x5f, SDLK_PAUSE);      // an Amiga has no Pause key: Help
+#endif
     atexit(SDL_Quit);
 
     int numJoysticks = SDL_NumJoysticks();
