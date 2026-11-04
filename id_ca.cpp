@@ -1050,7 +1050,8 @@ void CA_CacheScreen (int chunk)
     read(grhandle,bigbufferseg,compressed);
     source = (int32_t *) bigbufferseg;
 
-    expanded = *source++;
+    expanded = LE32(*source);
+    source++;
 
 //
 // allocate final space, decompress it, and free bigbuffer
