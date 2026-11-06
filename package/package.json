@@ -1,0 +1,86 @@
+{
+  "drawer": "Wolf3D",
+  "drawer_icon": "amiga/icons/Wolf3D-drawer.info",
+  "archive": "wolf3d-{version}-68040",
+  "members": [
+    {
+      "name": "wolf3d",
+      "build": "wolf3d",
+      "check": "executable_sha256"
+    },
+    {
+      "name": "Libs/acgame.library",
+      "build": "acgame.library",
+      "check": "acgame_library_sha256"
+    },
+    {
+      "name": "wolf3d.info",
+      "repo": "amiga/icons/wolf3d.info"
+    },
+    {
+      "name": "ReadMe",
+      "repo": "AMIGA_PORT.md"
+    },
+    {
+      "name": "ReadMe.info",
+      "repo": "amiga/icons/ReadMe.info"
+    },
+    {
+      "name": "license-id.txt",
+      "repo": "license-id.txt"
+    },
+    {
+      "name": "license-id.txt.info",
+      "repo": "amiga/icons/license-id.txt.info"
+    },
+    {
+      "name": "license-mame.txt",
+      "repo": "license-mame.txt"
+    },
+    {
+      "name": "license-mame.txt.info",
+      "repo": "amiga/icons/license-mame.txt.info"
+    }
+  ],
+  "aminet": [
+    [
+      "Short",
+      "Wolf4SDL, Wolfenstein 3-D engine, 68040+FPU"
+    ],
+    [
+      "Author",
+      "id Software; Wolf4SDL: Moritz Kroll; Amiga port: AmiCradle Team"
+    ],
+    [
+      "Uploader",
+      "AmiCradle Team"
+    ],
+    [
+      "Type",
+      "game/shoot"
+    ],
+    [
+      "Version",
+      "{version}"
+    ],
+    [
+      "Requires",
+      "AmigaOS 3.x, 68040/68060 with FPU, AGA or RTG, AHI, the shareware WL1 data"
+    ],
+    [
+      "Architecture",
+      "m68k-amigaos >= 3.0"
+    ]
+  ],
+  "root": [
+    {
+      "name": "Install-Wolf3D",
+      "repo": "package/installer/Install-Wolf3D",
+      "installer": true
+    },
+    {
+      "name": "Install-Wolf3D.info",
+      "repo": "package/installer/Install-Wolf3D.info"
+    }
+  ]
+}

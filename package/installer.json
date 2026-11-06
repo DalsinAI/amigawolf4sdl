@@ -1,0 +1,13 @@
+{
+  "name": "Wolf4SDL",
+  "version": "0.1.0-rc1",
+  "drawer": "Wolf3D",
+  "program": "wolf3d",
+  "cpu": "68040",
+  "fpu": true,
+  "space": 1500000,
+  "modules": [],
+  "keep": [],
+  "parent": "Work:Games",
+  "badge": "../amiga/icons/art/wolf3d.png"
+}

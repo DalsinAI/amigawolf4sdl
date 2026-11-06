@@ -25,14 +25,31 @@ review; Confirm source/data licences before release.
     make -f amiga/Makefile.amigaos \
         STOVE=/path/to/openamigagcc-16.2.0-open4-x86_64-linux \
         NDK=/path/to/gfopensdk/OpenNDK/Include_H \
-        ACSDL=/path/to/amicradle-guest/gameports/acsdl12
+        ACSDL=/path/to/amicradle-guest/gameports/acsdl12 \
+        ACSDLLIB=/path/to/acsdl12/build \
+        ACGAME=/path/to/acgame ACGAMELIB=/path/to/acgame/build-amiga
 
-acsdl12 (amicradle-guest `gameports/acsdl12`, built with its own
-`Makefile.amigaos`) is SDL 1.2 on ACGame and AHI. This gives
+acsdl12 (amicradle-guest `gameports/acsdl12`) is SDL 1.2 on ACGame and AHI.
+It is built with its own `Makefile.amigaos` without its own copy of ACGame
+(`ACG=`): the game links acgame.library's stubs (`libacgame.a`). The drawer's
+`Libs` holds the acgame.library the game was built against, and the game opens
+that copy first. `package/build-amiga.sh` (STOVE and OUT set) makes the
+release archive with its installer, fetching and building acgame, acsdl12 and
+zlib at pinned commits. The GlowIcons are made with port_icons.py from
+`amiga/icons/icons.json` (the art is Wolf4SDL's own icon). This gives
 `build/amigaos/wolf3d` for the shareware episode (the `.WL1` files);
 `VARIANT=full` builds it for the full game (`.WL6`). Run it from a drawer that
 holds the game's data; the data is not in this repository. 320x200 in 256
 colours, AGA or RTG (`ENV:ACGame/Display`). Help is Pause.
+
+## Installing
+
+Unpack the archive anywhere (on AmiCradle: `SYS:Utilities/OpenCompress x
+wolf3d-...lha RAM:`), then double-click `Install-Wolf3D` beside the `Wolf3D`
+drawer: it asks where to put the game (`Work:Games` by default). An update
+replaces only the archive's own files, so the game's data, settings and saved
+games stay. Then copy the shareware `.WL1` files into the drawer and
+double-click `wolf3d`.
 
 The game's data is little-endian. Under `WOLF_BIG_ENDIAN` every load swaps what
 it reads (the page file's header and sprite headers, the graphics dictionary,
