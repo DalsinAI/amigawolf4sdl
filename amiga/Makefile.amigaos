@@ -2,17 +2,24 @@
 #
 #   make -f amiga/Makefile.amigaos STOVE=/path/to/os32-gcc16/prefix \
 #        NDK=/path/to/gfopensdk/OpenNDK/Include_H \
-#        ACSDL=/path/to/amicradle-guest/gameports/acsdl12
+#        ACSDL=/path/to/amicradle-guest/gameports/acsdl12 \
+#        ACSDLLIB=/path/to/acsdl12/build ACGAME=/path/to/acgame \
+#        ACGAMELIB=/path/to/acgame/build-amiga
 #
 # STOVE is GFOpenAmigaGCC 16.2.0-open4 or later. ACSDL is acsdl12, built with
 # its own Makefile.amigaos. VARIANT picks the data the game is built for, as
 # version.h explains: shareware (WL1, the default) or full (WL6).
+# acsdl12 is built with ACG= into ACSDLLIB, without its own copy of ACGame:
+# the game gets ACGame from acgame.library, through ACGAMELIB's libacgame.a
+# (DalsinAI/acgame's stubs). package/acgame-deps.sh builds both.
 # Output: build/amigaos/wolf3d, run from a drawer that holds the game's data.
 
 STOVE   ?= $(HOME)/AmiCradle/stoves/os32-gcc16/prefix
 NDK     ?= $(HOME)/AmiCradle/gfopensdk/OpenNDK/Include_H
 ACSDL   ?= ../amicradle-guest/gameports/acsdl12
+ACSDLLIB ?= $(ACSDL)/build/amigaos
 ACGAME  ?= $(ACSDL)/../acgame
+ACGAMELIB ?= $(ACGAME)/build-amiga
 CC      = $(STOVE)/bin/m68k-amigaos-gcc
 CXX     = $(STOVE)/bin/m68k-amigaos-g++
 CPU     ?= -m68040 -m68881
@@ -34,7 +41,7 @@ OBJS    = $(SRCS:%.cpp=$(BUILD)/%.o)
 all: $(BUILD)/wolf3d
 
 $(BUILD)/wolf3d: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $^ $(ACSDL)/build/amigaos/libacsdl12.a -lm
+	$(CC) $(LDFLAGS) -o $@ $^ $(ACSDLLIB)/libacsdl12.a $(ACGAMELIB)/libacgame.a -lm
 
 $(BUILD)/%.o: %.cpp | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
