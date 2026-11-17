@@ -22,7 +22,7 @@ ACGAME  ?= $(ACSDL)/../acgame
 ACGAMELIB ?= $(ACGAME)/build-amiga
 CC      = $(STOVE)/bin/m68k-amigaos-gcc
 CXX     = $(STOVE)/bin/m68k-amigaos-g++
-CPU     ?= -m68040 -m68881
+CPU     ?= -m68040 -msoft-float
 OPT     ?= -O2 -fomit-frame-pointer
 VARIANT ?= shareware
 FLAGS   = -noixemul $(OPT) $(CPU) -fcommon -w -DVARIANT_$(VARIANT) -DWOLF_BIG_ENDIAN -DDATADIR=\"PROGDIR:\" \

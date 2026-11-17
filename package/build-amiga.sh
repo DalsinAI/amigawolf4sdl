@@ -26,7 +26,12 @@ cd "$ROOT"
 ACSDL12=1
 . "$HERE/acgame-deps.sh"
 
-make -f amiga/Makefile.amigaos STOVE="$STOVE" NDK="$NDK" ACSDL="$ACSDL" ACSDLLIB="$ACSDLLIB" ACGAME="$ACGAME" ACGAMELIB="$ACGAMELIB" -j4 > "$OUT/build-output.txt" 2>&1 || { tail -n 60 "$OUT/build-output.txt"; exit 1; }
+make -f amiga/Makefile.amigaos STOVE="$STOVE" NDK="$NDK" ACSDL="$ACSDL" ACSDLLIB="$ACSDLLIB" ACGAME="$ACGAME" ACGAMELIB="$ACGAMELIB" -j"${JOBS:-2}" > "$OUT/build-output.txt" 2>&1 || { tail -n 60 "$OUT/build-output.txt"; exit 1; }
+# One binary for every 68040 and 68060: -m68040 -msoft-float throughout (the
+# game and acsdl12), no FPU instruction in their objects, the stove's fpuauto
+# linked in.
+{ sh "$HERE/soft-float.sh" "$STOVE" build/amigaos/wolf3d --log "$OUT/build-output.txt" --log "$OUT/acsdl12-output.txt" build/amigaos "$ACSDLLIB"; } > "$OUT/soft-float.txt" || { cat "$OUT/soft-float.txt"; exit 1; }
+cat "$OUT/soft-float.txt"
 cp build/amigaos/wolf3d "$BUILD/wolf3d"
 
 # What the ReadMe and the check name: the program's SHA-256, the commit, the
