@@ -1,6 +1,6 @@
 {
   "name": "Wolf4SDL",
-  "version": "0.1.0-rc1",
+  "version": "0.1.0-rc2",
   "drawer": "Wolf3D",
   "program": "wolf3d",
   "cpu": "68040",
@@ -9,5 +9,22 @@
   "modules": [],
   "keep": [],
   "parent": "Work:Games",
-  "badge": "../amiga/icons/art/wolf3d.png"
+  "badge": "../amiga/icons/art/wolf3d.png",
+  "data": [
+    {
+      "what": "the Wolfenstein 3-D shareware data (v1.4)",
+      "files": [
+        "AUDIOHED.WL1",
+        "AUDIOT.WL1",
+        "GAMEMAPS.WL1",
+        "MAPHEAD.WL1",
+        "VGADICT.WL1",
+        "VGAGRAPH.WL1",
+        "VGAHEAD.WL1",
+        "VSWAP.WL1"
+      ],
+      "import": true,
+      "optional": true
+    }
+  ]
 }

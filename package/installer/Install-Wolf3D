@@ -1,10 +1,10 @@
-; $VER: Install-Wolf3D 0.1.0-rc1 (6.11.2026)
+; $VER: Install-Wolf3D 0.1.0-rc2 (17.11.2026)
 ; The Amiga Installer script for Wolf4SDL, an AmiCradle game port.
-; Made by amicradle scripts/port_installer.py: change the spec, not this file.
+; Made by amicradle scripts/ports/port_installer.py: change the spec, not this file.
 ; Run it from its icon, beside the Wolf3D drawer where the archive was unpacked.
 
 (set @app-name "Wolf4SDL")
-(set #version "0.1.0-rc1")
+(set #version "0.1.0-rc2")
 (set #drawer "Wolf3D")
 (set #program "wolf3d")
 (set #space 1465)  ; KB
@@ -30,7 +30,7 @@
 (if (<> (exists (tackon #from #program) (noreq)) 1)
     (abort "The Wolf3D drawer has no wolf3d in it. Unpack the whole archive again."))
 
-(welcome "This installs Wolf4SDL 0.1.0-rc1 for AmigaOS 3.2 on a 68040, 68060 or 68080 with an FPU.")
+(welcome "This installs Wolf4SDL 0.1.0-rc2 for AmigaOS 3.2 on a 68040, 68060 or 68080 with an FPU.")
 
 ; where: the parent drawer
 (set #default
@@ -75,11 +75,71 @@
         (dest #parent)
         (choices "Wolf3D.info")))
 
+(set #later "")
+
+; the game data the drawer does not carry: downloaded with C:Atlas, or copied from
+; the player's own drawer, disk or CD; each file's SHA-256 checked where the spec names it
+(set #atlas (= (exists "C:Atlas" (noreq)) 1))
+
+; the Wolfenstein 3-D shareware data (v1.4)
+(set #into1 #dest)
+(if (<> (exists #into1 (noreq)) 2) (makedir #into1))
+(set #have (and (= (exists (tackon #into1 "AUDIOHED.WL1") (noreq)) 1) (= (exists (tackon #into1 "AUDIOT.WL1") (noreq)) 1) (= (exists (tackon #into1 "GAMEMAPS.WL1") (noreq)) 1) (= (exists (tackon #into1 "MAPHEAD.WL1") (noreq)) 1) (= (exists (tackon #into1 "VGADICT.WL1") (noreq)) 1) (= (exists (tackon #into1 "VGAGRAPH.WL1") (noreq)) 1) (= (exists (tackon #into1 "VGAHEAD.WL1") (noreq)) 1) (= (exists (tackon #into1 "VSWAP.WL1") (noreq)) 1)))
+(if (not #have)
+    (
+        (set #how
+            (askchoice
+                (prompt "Wolf4SDL needs the Wolfenstein 3-D shareware data (v1.4). How should the Installer get it?")
+                (help "Wolf4SDL needs the Wolfenstein 3-D shareware data (v1.4): AUDIOHED.WL1, AUDIOT.WL1, GAMEMAPS.WL1, MAPHEAD.WL1, VGADICT.WL1, VGAGRAPH.WL1, VGAHEAD.WL1, VSWAP.WL1, in the drawer itself. Copy takes the files from a drawer you choose: the game's own install, a disk or a CD. Not now leaves the drawer as it is: run the Installer again later, or copy the files in yourself.")
+                (choices "Copy it from my own drawer, disk or CD" "Not now: the game starts without it")
+                (default 0)))
+        (if (= #how 0)
+            (
+                (set #src
+                    (askdir
+                        (prompt "Choose the drawer (or disk, or CD) that has AUDIOHED.WL1, AUDIOT.WL1, GAMEMAPS.WL1, MAPHEAD.WL1, VGADICT.WL1, VGAGRAPH.WL1, VGAHEAD.WL1, VSWAP.WL1.")
+                        (help "Wolf4SDL needs the Wolfenstein 3-D shareware data (v1.4): AUDIOHED.WL1, AUDIOT.WL1, GAMEMAPS.WL1, MAPHEAD.WL1, VGADICT.WL1, VGAGRAPH.WL1, VGAHEAD.WL1, VSWAP.WL1, in the drawer itself. Copy takes the files from a drawer you choose: the game's own install, a disk or a CD. Not now leaves the drawer as it is: run the Installer again later, or copy the files in yourself.")
+                        (default #dest)))
+                (set #ok 1)
+                (if (<> (exists (tackon #src "AUDIOHED.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no AUDIOHED.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "AUDIOT.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no AUDIOT.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "GAMEMAPS.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no GAMEMAPS.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "MAPHEAD.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no MAPHEAD.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "VGADICT.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no VGADICT.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "VGAGRAPH.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no VGAGRAPH.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "VGAHEAD.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no VGAHEAD.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if (<> (exists (tackon #src "VSWAP.WL1") (noreq)) 1)
+                    ((set #ok 0) (message (cat "There is no VSWAP.WL1 in " #src ". Nothing was copied for the Wolfenstein 3-D shareware data (v1.4): run Install-Wolf3D again to choose another drawer."))))
+                (if #ok
+                    (copyfiles
+                        (prompt "Copying the Wolfenstein 3-D shareware data (v1.4)")
+                        (help @copyfiles-help)
+                        (source #src)
+                        (dest #into1)
+                        (choices "AUDIOHED.WL1" "AUDIOT.WL1" "GAMEMAPS.WL1" "MAPHEAD.WL1" "VGADICT.WL1" "VGAGRAPH.WL1" "VGAHEAD.WL1" "VSWAP.WL1")
+                        (optional "nofail" "force")))
+            )
+        )
+        (if (= #how 1)
+            (set #later (if (= #later "") "the Wolfenstein 3-D shareware data (v1.4)" (cat #later ", " "the Wolfenstein 3-D shareware data (v1.4)")))
+        )
+    )
+)
+(complete 90)
+
 (set @default-dest #dest)
 (complete 100)
 (if @pretend
     (message (cat "Pretend: nothing was copied or changed. Wolf4SDL would have gone in " #dest "."))
-    (message (cat "Wolf4SDL 0.1.0-rc1 is installed in " #dest "."
+    (message (cat "Wolf4SDL 0.1.0-rc2 is installed in " #dest "."
                   "\n\nTo start it, open the Wolf3D drawer and double-click the wolf3d icon."
-                  (if (= #kept "") "" (cat "\n\nLeft as they were: " #kept ".")))))
+                  (if (= #kept "") "" (cat "\n\nLeft as they were: " #kept "."))
+                  (if (= #later "") "" (cat "\n\nStill to add to the drawer: " #later ". Run Install-Wolf3D again to fetch or copy it.")))))
 (exit (quiet))
